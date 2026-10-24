@@ -68,13 +68,46 @@ app.include_router(audit_router, prefix=api_v1_prefix)
 app.include_router(reports_router, prefix=api_v1_prefix)
 app.include_router(health_router, prefix=api_v1_prefix)
 
-@app.get("/")
-def root():
-    return {
-        "project": settings.PROJECT_NAME,
-        "version": settings.VERSION,
-        "track": "PRAGYAN 2K26 National-Level Hackathon Track 4-01",
-        "description": "Verified AI Co-Pilot for MSME Productivity with Verifiable ROI",
-        "docs": "/docs",
-        "health": f"{settings.API_V1_STR}/health"
-    }
+import os
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# Check for production frontend build (e.g. in unified Docker or Render deploy)
+possible_dist_dirs = [
+    Path(os.getenv("FRONTEND_DIST_DIR", "")),
+    Path("/app/frontend_dist"),
+    Path(__file__).resolve().parent.parent.parent / "frontend" / "dist",
+    Path(__file__).resolve().parent.parent / "frontend_dist"
+]
+FRONTEND_DIST_DIR = next((p for p in possible_dist_dirs if p and p.exists() and (p / "index.html").exists()), None)
+
+if FRONTEND_DIST_DIR:
+    assets_dir = FRONTEND_DIST_DIR / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_root():
+        return FileResponse(FRONTEND_DIST_DIR / "index.html")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api/") or full_path in ["docs", "openapi.json", "redoc"]:
+            return JSONResponse(status_code=404, content={"detail": "Not found"})
+        target_file = FRONTEND_DIST_DIR / full_path
+        if full_path and target_file.is_file():
+            return FileResponse(target_file)
+        return FileResponse(FRONTEND_DIST_DIR / "index.html")
+else:
+    @app.get("/")
+    def root():
+        return {
+            "project": settings.PROJECT_NAME,
+            "version": settings.VERSION,
+            "track": "PRAGYAN 2K26 National-Level Hackathon Track 4-01",
+            "description": "Verified AI Co-Pilot for MSME Productivity with Verifiable ROI",
+            "docs": "/docs",
+            "health": f"{settings.API_V1_STR}/health"
+        }
+

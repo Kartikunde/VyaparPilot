@@ -1,0 +1,21 @@
+# ==========================================
+# Render Blueprint Configuration (render.yaml)
+# https://render.com/docs/blueprint-spec
+# ==========================================
+
+services:
+  - type: web
+    name: vyaparpilot-ai
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/v1/health/
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

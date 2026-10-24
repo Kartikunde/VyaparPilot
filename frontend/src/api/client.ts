@@ -1,4 +1,4 @@
-const API_BASE = '/api/v1';
+const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL || '') + '/api/v1';
 
 export function getAuthToken(): string | null {
   return localStorage.getItem('vyaparpilot_token');
