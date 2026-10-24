@@ -34,14 +34,40 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS configuration
+# CORS configuration allowing production Vercel frontend, Render, and local development
+allowed_origins = [
+    "https://vyapar-pilot.vercel.app",
+    "https://vyaparpilot.onrender.com",
+    "https://vyapar-pilot.onrender.com",
+    "https://vyaparpilot-ai.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins for local hackathon demo and testing
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Root-level health check endpoint
+@app.get("/health", tags=["Health & Status"])
+@app.get("/health/", tags=["Health & Status"])
+def root_health():
+    return {
+        "status": "healthy",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "api_v1_docs": "/docs"
+    }
 
 # Safe global exception handling
 @app.exception_handler(Exception)

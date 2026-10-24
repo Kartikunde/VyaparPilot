@@ -6,12 +6,23 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_DB_PATH = (BACKEND_DIR / "vyaparpilot.db").as_posix()
 
+# Handle Vercel Serverless environment where only /tmp is writable
+if os.getenv("VERCEL") and not os.getenv("DATABASE_URL"):
+    tmp_db = Path("/tmp/vyaparpilot.db")
+    if not tmp_db.exists() and (BACKEND_DIR / "vyaparpilot.db").exists():
+        import shutil
+        try:
+            shutil.copyfile((BACKEND_DIR / "vyaparpilot.db").as_posix(), "/tmp/vyaparpilot.db")
+        except Exception:
+            pass
+    DEFAULT_DB_PATH = "/tmp/vyaparpilot.db"
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "VyaparPilot AI"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
-    # Database (resolves to absolute path)
+    # Database (resolves to absolute path or PostgreSQL)
     DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}")
     
     # Security
@@ -26,12 +37,17 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS: List[str] = [
+        "https://vyapar-pilot.vercel.app",
+        "https://vyaparpilot.onrender.com",
+        "https://vyapar-pilot.onrender.com",
+        "https://vyaparpilot-ai.onrender.com",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
-        "http://127.0.0.1:8000"
+        "http://127.0.0.1:8000",
+        "https://*.vercel.app"
     ]
     
     # Environment

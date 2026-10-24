@@ -6,6 +6,7 @@ from app.core.config import settings
 
 router = APIRouter(prefix="/health", tags=["Health & Status"])
 
+@router.get("")
 @router.get("/")
 def health_check(db: Session = Depends(get_db)):
     db_ok = False
