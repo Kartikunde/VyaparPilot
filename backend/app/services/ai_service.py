@@ -90,43 +90,52 @@ def extract_via_rule_based_demo(raw_text: str) -> ExtractedEnquiryStructure:
         line_clean = line.strip()
         if not line_clean:
             continue
-        
-        # Check for item lines with quantities (e.g., "1. 5 nos Three Phase Induction Motor 5HP" or "10 pcs Heavy Duty Pneumatic Cylinder")
-        qty_match = re.search(r'(\d+(?:\.\d+)?)\s*(nos|pcs|meters|mtrs|boxes|sets|units|kg|kgs|no)?\b', line_clean, re.IGNORECASE)
-        
+
         # Look for keywords indicating electrical/industrial products
-        keywords = ["motor", "pump", "cylinder", "valve", "cable", "switchgear", "bearing", "sensor", "contactor", "relay", "pipe", "fastener", "box", "tape", "film"]
+        keywords = ["motor", "pump", "cylinder", "valve", "cable", "switchgear", "bearing", "sensor", "contactor", "relay", "pipe", "fastener", "box", "tape", "film", "vfd", "drive", "breaker", "wire", "hose"]
         has_product_keyword = any(kw in line_clean.lower() for kw in keywords)
-        
+
         if has_product_keyword:
+            # 1. Strip leading list numbering e.g. '1. ', '2) ', '- ', '* '
+            without_num = re.sub(r'^\s*(?:\[\d+\]|\(\d+\)|\d+[\.\)\:\-]|[\-\*\•])\s*', '', line_clean)
+
+            # 2. Search for explicit unit quantity (e.g. '4 Nos', '100 meters', '10 PCS')
+            unit_qty = re.search(r'[-–:]?\s*(\d+(?:\.\d+)?)\s*(nos|pcs|meters|mtrs|boxes|sets|units|kg|kgs|no|pieces|ea)\b', without_num, re.IGNORECASE)
+
             qty = 1.0
             unit = "PCS"
-            if qty_match:
+            cleaned_query = without_num
+
+            if unit_qty:
                 try:
-                    qty = float(qty_match.group(1))
-                    unit_raw = qty_match.group(2)
-                    if unit_raw:
-                        unit = unit_raw.upper()
-                        if unit in ["NOS", "NO", "UNITS"]:
-                            unit = "PCS"
-                        elif unit in ["MTRS"]:
-                            unit = "METERS"
+                    qty = float(unit_qty.group(1))
+                    unit_str = unit_qty.group(2).upper()
+                    if unit_str in ["NOS", "NO", "UNITS", "PIECES", "EA"]:
+                        unit = "PCS"
+                    elif unit_str in ["MTRS"]:
+                        unit = "METERS"
+                    else:
+                        unit = unit_str
                 except Exception:
                     qty = 1.0
-
-            # Strip numbering like "1.", "2)", "-", "*"
-            cleaned_query = re.sub(r'^\s*[\d\.\-\*\)]+\s*', '', line_clean)
-            # Remove the quantity and unit substring if matched
-            if qty_match:
-                cleaned_query = cleaned_query.replace(qty_match.group(0), '')
-            cleaned_query = cleaned_query.strip(" ,.-")
+                # Remove the unit and quantity substring
+                cleaned_query = (without_num[:unit_qty.start()] + without_num[unit_qty.end():]).strip(' -–:,.*')
+            else:
+                # Check for leading number quantity e.g. "5 Induction Motors"
+                leading_qty = re.match(r'^(\d+(?:\.\d+)?)\s+', without_num)
+                if leading_qty:
+                    try:
+                        qty = float(leading_qty.group(1))
+                        cleaned_query = without_num[leading_qty.end():].strip(' -–:,.*')
+                    except Exception:
+                        qty = 1.0
 
             items.append(ExtractedItem(
-                product_query=cleaned_query if cleaned_query else line_clean,
+                product_query=cleaned_query if cleaned_query else without_num,
                 quantity=qty,
                 unit=unit,
                 specifications=f"Extracted from: {line_clean[:80]}",
-                urgency_or_notes=None
+                urgency_or_notes="Urgent requirement" if "urgent" in line_clean.lower() else None
             ))
 
     # If no items detected via line parsing, supply intelligent fallback from entire text
