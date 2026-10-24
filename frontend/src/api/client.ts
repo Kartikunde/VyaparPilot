@@ -283,7 +283,33 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ action: 'REJECT', comments }),
       }),
-    getPdfUrl: (id: number) => buildEndpointUrl(`/quotations/${id}/pdf`),
+    getPdfUrl: (id: number) => {
+      const token = getAuthToken();
+      const base = buildEndpointUrl(`/quotations/${id}/pdf`);
+      return token ? `${base}?token=${encodeURIComponent(token)}` : base;
+    },
+    downloadPdf: async (id: number, quotationNumber: string = 'quotation') => {
+      const token = getAuthToken();
+      const url = buildEndpointUrl(`/quotations/${id}/pdf`);
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to download PDF (${response.status}): ${errorText || response.statusText}`);
+      }
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `Quotation_${quotationNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    },
   },
 
   roi: {

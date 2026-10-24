@@ -587,6 +587,7 @@ def download_quotation_pdf(
         content=pdf_buffer.getvalue(),
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"inline; filename={filename}"
+            "Content-Disposition": f"attachment; filename=\"{filename}\"",
+            "Access-Control-Expose-Headers": "Content-Disposition"
         }
     )

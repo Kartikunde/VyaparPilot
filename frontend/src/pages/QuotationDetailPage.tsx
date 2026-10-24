@@ -31,6 +31,7 @@ export const QuotationDetailPage: React.FC = () => {
   const [approvalComments, setApprovalComments] = useState('');
   const [rejectionComments, setRejectionComments] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   useEffect(() => {
     loadQuotation();
@@ -153,15 +154,25 @@ export const QuotationDetailPage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           {/* PDF Download Button */}
-          <a
-            href={api.quotations.getPdfUrl(quotation.id)}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition-colors"
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                setDownloadingPdf(true);
+                await api.quotations.downloadPdf(quotation.id, quotation.quotation_number);
+              } catch (e: any) {
+                console.error('Blob download failed, using direct link fallback:', e);
+                window.open(api.quotations.getPdfUrl(quotation.id), '_blank');
+              } finally {
+                setDownloadingPdf(false);
+              }
+            }}
+            disabled={downloadingPdf}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download Official PDF</span>
-          </a>
+            <span>{downloadingPdf ? 'Downloading PDF...' : 'Download Official PDF'}</span>
+          </button>
 
           {/* Workflow Buttons */}
           {(quotation.status === 'DRAFT' || quotation.status === 'NEEDS_REVIEW') && (
