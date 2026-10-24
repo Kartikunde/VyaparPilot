@@ -30,23 +30,31 @@ router = APIRouter(prefix="/quotations", tags=["Quotation Builder & Approvals"])
 def generate_next_quotation_number(db: Session, business: Business, prefix: str = "VP") -> str:
     """Generates unique, monotonically increasing quotation number scoped to business and year."""
     year = datetime.now().year
-    prefix_str = f"{prefix}-{year}-"
+    if business.id == 2:
+        prefix_str = f"{prefix}-{year}-"
+    else:
+        prefix_str = f"{prefix}-{business.id:02d}-{year}-"
     
     last_quote = db.query(Quotation).filter(
         Quotation.business_id == business.id,
         Quotation.quotation_number.like(f"{prefix_str}%")
     ).order_by(desc(Quotation.id)).first()
 
+    next_seq = 1
     if last_quote and last_quote.quotation_number:
         try:
             seq_part = last_quote.quotation_number.replace(prefix_str, "")
             next_seq = int(seq_part) + 1
         except ValueError:
             next_seq = 1
-    else:
-        next_seq = 1
 
-    return f"{prefix_str}{next_seq:04d}"
+    candidate = f"{prefix_str}{next_seq:04d}"
+    while db.query(Quotation).filter(Quotation.quotation_number == candidate).first():
+        next_seq += 1
+        candidate = f"{prefix_str}{next_seq:04d}"
+
+    return candidate
+
 
 @router.post("/calculate", response_model=QuotationCalculationResponse)
 def calculate_preview(

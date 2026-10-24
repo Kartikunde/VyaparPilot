@@ -55,18 +55,22 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
-# Register API v1 Routers
-api_v1_prefix = settings.API_V1_STR
-app.include_router(auth_router, prefix=api_v1_prefix)
-app.include_router(business_router, prefix=api_v1_prefix)
-app.include_router(products_router, prefix=api_v1_prefix)
-app.include_router(customers_router, prefix=api_v1_prefix)
-app.include_router(enquiries_router, prefix=api_v1_prefix)
-app.include_router(quotations_router, prefix=api_v1_prefix)
-app.include_router(roi_router, prefix=api_v1_prefix)
-app.include_router(audit_router, prefix=api_v1_prefix)
-app.include_router(reports_router, prefix=api_v1_prefix)
-app.include_router(health_router, prefix=api_v1_prefix)
+# Register API Routers under both /api/v1 and /api
+prefixes = [settings.API_V1_STR]
+if settings.API_V1_STR != "/api":
+    prefixes.append("/api")
+
+for prefix in prefixes:
+    app.include_router(auth_router, prefix=prefix)
+    app.include_router(business_router, prefix=prefix)
+    app.include_router(products_router, prefix=prefix)
+    app.include_router(customers_router, prefix=prefix)
+    app.include_router(enquiries_router, prefix=prefix)
+    app.include_router(quotations_router, prefix=prefix)
+    app.include_router(roi_router, prefix=prefix)
+    app.include_router(audit_router, prefix=prefix)
+    app.include_router(reports_router, prefix=prefix)
+    app.include_router(health_router, prefix=prefix)
 
 import os
 from pathlib import Path

@@ -1,9 +1,17 @@
 @echo off
 echo ============================================================
-echo   Serving Production Pre-Built Frontend Bundle
-echo   VyaparPilot AI (Compiled Static Distribution)
+echo   VyaparPilot AI - Production Server
+echo   Serving Compiled Frontend + REST API on port 8000
 echo ============================================================
 echo.
-echo Serving pre-compiled dist/ on http://localhost:5000 ...
-python -m http.server 5000 --directory "%~dp0frontend\dist"
+cd /d "%~dp0backend"
+if exist venv\Scripts\activate.bat (
+    call venv\Scripts\activate.bat
+) else (
+    python -m venv venv
+    call venv\Scripts\activate.bat
+    pip install -r requirements.txt
+)
+echo Starting unified server on http://localhost:8000 ...
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 pause

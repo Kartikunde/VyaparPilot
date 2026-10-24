@@ -13,7 +13,9 @@ import {
   Save,
   Package,
   Layers,
-  Sparkles
+  Sparkles,
+  UserPlus,
+  X
 } from 'lucide-react';
 
 export const QuotationBuilderPage: React.FC = () => {
@@ -29,6 +31,13 @@ export const QuotationBuilderPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [enquiryId, setEnquiryId] = useState<number | undefined>(undefined);
 
+  // Quick Customer Modal
+  const [showQuickCustomerModal, setShowQuickCustomerModal] = useState(false);
+  const [newCustName, setNewCustName] = useState('');
+  const [newCustCompany, setNewCustCompany] = useState('');
+  const [newCustPhone, setNewCustPhone] = useState('');
+  const [newCustEmail, setNewCustEmail] = useState('');
+
   // Financial fields
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [overallDiscountPct, setOverallDiscountPct] = useState<number>(0);
@@ -42,6 +51,7 @@ export const QuotationBuilderPage: React.FC = () => {
   const [calcResponse, setCalcResponse] = useState<QuotationCalculationResponse | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     loadPrerequisites();
@@ -69,8 +79,25 @@ export const QuotationBuilderPage: React.FC = () => {
           );
           if (matchedCust) {
             setSelectedCustomerId(matchedCust.id);
-          } else if (custList.length > 0) {
-            setSelectedCustomerId(custList[0].id);
+          } else {
+            // Auto-create customer extracted by AI from enquiry!
+            try {
+              const autoCust = await api.customers.create({
+                name: stateData.customer_name || 'Procurement In-charge',
+                company_name: stateData.company_name,
+                phone: stateData.contact_phone || '+91 98220 12345',
+                email: stateData.contact_email || 'procurement@client.com',
+                city: stateData.delivery_location || 'Pune',
+                state: 'Maharashtra',
+                billing_address: stateData.delivery_location || 'Industrial Area',
+                shipping_address: stateData.delivery_location || 'Industrial Area'
+              });
+              setCustomers(prev => [...prev, autoCust]);
+              setSelectedCustomerId(autoCust.id);
+            } catch (createErr) {
+              console.error('Failed to auto-create customer from enquiry:', createErr);
+              if (custList.length > 0) setSelectedCustomerId(custList[0].id);
+            }
           }
         } else if (custList.length > 0) {
           setSelectedCustomerId(custList[0].id);
@@ -82,6 +109,7 @@ export const QuotationBuilderPage: React.FC = () => {
       } else if (custList.length > 0 && !selectedCustomerId) {
         setSelectedCustomerId(custList[0].id);
       }
+
     } catch (err) {
       console.error('Failed to load prerequisites:', err);
     }
@@ -177,7 +205,32 @@ export const QuotationBuilderPage: React.FC = () => {
     setItems(updated);
   };
 
+  const handleQuickAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustName || !newCustCompany || !newCustPhone) return;
+    try {
+      const created = await api.customers.create({
+        name: newCustName,
+        company_name: newCustCompany,
+        phone: newCustPhone,
+        email: newCustEmail || undefined,
+        city: 'Pune',
+        state: 'Maharashtra',
+      });
+      setCustomers(prev => [...prev, created]);
+      setSelectedCustomerId(created.id);
+      setShowQuickCustomerModal(false);
+      setNewCustName('');
+      setNewCustCompany('');
+      setNewCustPhone('');
+      setNewCustEmail('');
+    } catch (err: any) {
+      alert(err.message || 'Failed to create customer');
+    }
+  };
+
   const handleSaveQuotation = async (submitForApproval: boolean = false) => {
+
     if (!selectedCustomerId) {
       setError('Please select a customer for this quotation.');
       return;
@@ -275,7 +328,16 @@ export const QuotationBuilderPage: React.FC = () => {
           {/* Header Card: Customer & Details */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Select Customer</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700">Select Customer</label>
+                <button
+                  type="button"
+                  onClick={() => setShowQuickCustomerModal(true)}
+                  className="text-[11px] font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1"
+                >
+                  <UserPlus className="w-3 h-3" /> + New Customer
+                </button>
+              </div>
               <select
                 value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(Number(e.target.value))}
@@ -289,6 +351,7 @@ export const QuotationBuilderPage: React.FC = () => {
                 ))}
               </select>
             </div>
+
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Quotation Title / Subject</label>
@@ -589,6 +652,94 @@ export const QuotationBuilderPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick Add Customer Modal */}
+      {showQuickCustomerModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <UserPlus className="w-4 h-4 text-brand-600" />
+                <span>Quick Add Customer</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowQuickCustomerModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickAddCustomer} className="p-5 space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Company / Organization Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustCompany}
+                  onChange={(e) => setNewCustCompany(e.target.value)}
+                  placeholder="e.g. Precision Engineering Works"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Contact Person Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustName}
+                  onChange={(e) => setNewCustName(e.target.value)}
+                  placeholder="e.g. Rajesh Sharma"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">Phone Number *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newCustPhone}
+                    onChange={(e) => setNewCustPhone(e.target.value)}
+                    placeholder="e.g. 9822012345"
+                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    value={newCustEmail}
+                    onChange={(e) => setNewCustEmail(e.target.value)}
+                    placeholder="e.g. rajesh@precision.com"
+                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowQuickCustomerModal(false)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-xs"
+                >
+                  Create & Select Customer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
