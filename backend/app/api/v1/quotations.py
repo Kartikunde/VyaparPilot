@@ -1,9 +1,10 @@
 import json
+import secrets
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, func
 from app.core.database import get_db
 from app.models.quotation import Quotation, QuotationItem
 from app.models.customer import Customer
@@ -15,7 +16,8 @@ from app.models.user import User
 from app.models.enquiry import Enquiry
 from app.schemas.quotation import (
     QuotationCreate, QuotationUpdate, QuotationResponse, QuotationListResponse,
-    QuotationCalculationRequest, QuotationCalculationResponse, QuotationItemResponse
+    QuotationCalculationRequest, QuotationCalculationResponse, QuotationItemResponse,
+    QuotationSendRequest, RetailerResponseRequest, QuotationStatusCounts
 )
 from app.schemas.approval import ApprovalActionRequest, ApprovalEventResponse
 from app.schemas.roi import ProductivityMeasurementCreate
@@ -54,6 +56,54 @@ def generate_next_quotation_number(db: Session, business: Business, prefix: str 
         candidate = f"{prefix_str}{next_seq:04d}"
 
     return candidate
+
+def check_and_apply_expiry(quotation: Quotation, db: Session) -> bool:
+    """
+    Checks if a quotation in PENDING_RESPONSE status has passed its authoritative expires_at deadline.
+    If expired, atomically updates status to EXPIRED and logs an audit event.
+    """
+    if quotation.status == "PENDING_RESPONSE" and quotation.expires_at:
+        now = datetime.now(timezone.utc)
+        exp = quotation.expires_at if quotation.expires_at.tzinfo else quotation.expires_at.replace(tzinfo=timezone.utc)
+        if now >= exp:
+            quotation.status = "EXPIRED"
+            quotation.customer_response = "EXPIRED"
+            log_audit_event(
+                db=db,
+                business_id=quotation.business_id,
+                quotation_id=quotation.id,
+                event_type="QUOTATION_EXPIRED",
+                description=f"Quotation {quotation.quotation_number} passed its 24-hour acceptance deadline and expired automatically.",
+                metadata={"expires_at": exp.isoformat(), "expired_at": now.isoformat()}
+            )
+            db.commit()
+            return True
+    return False
+
+def format_quotation_response(q: Quotation, db: Session) -> QuotationResponse:
+    """Formats Quotation to QuotationResponse with customer details and remaining countdown seconds."""
+    check_and_apply_expiry(q, db)
+    r = QuotationResponse.model_validate(q)
+    if q.customer:
+        r.customer_name = q.customer.name
+        r.customer_company = q.customer.company_name
+        r.customer_email = q.customer.email
+        r.customer_phone = q.customer.phone
+        r.customer_gstin = q.customer.gstin
+
+    if q.status == "PENDING_RESPONSE" and q.expires_at:
+        now = datetime.now(timezone.utc)
+        exp = q.expires_at if q.expires_at.tzinfo else q.expires_at.replace(tzinfo=timezone.utc)
+        remaining = (exp - now).total_seconds()
+        r.seconds_remaining = max(0.0, remaining)
+        r.is_expired = remaining <= 0
+    elif q.status == "EXPIRED":
+        r.seconds_remaining = 0.0
+        r.is_expired = True
+    else:
+        r.seconds_remaining = None
+        r.is_expired = False
+    return r
 
 
 @router.post("/calculate", response_model=QuotationCalculationResponse)
@@ -107,15 +157,7 @@ def list_quotations(
     quotes = query.order_by(Quotation.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
     total_pages = (total + page_size - 1) // page_size if total > 0 else 1
 
-    responses = []
-    for q in quotes:
-        r = QuotationResponse.model_validate(q)
-        r.customer_name = q.customer.name if q.customer else None
-        r.customer_company = q.customer.company_name if q.customer else None
-        r.customer_email = q.customer.email if q.customer else None
-        r.customer_phone = q.customer.phone if q.customer else None
-        r.customer_gstin = q.customer.gstin if q.customer else None
-        responses.append(r)
+    responses = [format_quotation_response(q, db) for q in quotes]
 
     return QuotationListResponse(
         items=responses,
@@ -188,7 +230,8 @@ def create_quotation(
         delivery_terms=req.delivery_terms or settings.default_delivery_terms,
         notes=req.notes,
         has_guardrail_warnings=len(calc.warnings) > 0,
-        guardrail_warnings_json=json.dumps([w.model_dump() for w in calc.warnings]) if calc.warnings else None
+        guardrail_warnings_json=json.dumps([w.model_dump() for w in calc.warnings]) if calc.warnings else None,
+        public_token=secrets.token_urlsafe(24)
     )
     db.add(quotation)
     db.flush()
@@ -273,14 +316,161 @@ def create_quotation(
 
     db.commit()
     db.refresh(quotation)
+    return format_quotation_response(quotation, db)
 
-    resp = QuotationResponse.model_validate(quotation)
-    resp.customer_name = customer.name
-    resp.customer_company = customer.company_name
-    resp.customer_email = customer.email
-    resp.customer_phone = customer.phone
-    resp.customer_gstin = customer.gstin
-    return resp
+# Public Retailer Interface Routes (No Auth Required)
+@router.get("/public/portal/{token}")
+def get_retailer_portal_quotation(
+    token: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Public endpoint for retailer to review quotation proposal and live 24-hour countdown timer.
+    Accessed directly via secure tokenized proposal link.
+    """
+    quotation = db.query(Quotation).filter(Quotation.public_token == token).first()
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation proposal not found or link has expired.")
+
+    check_and_apply_expiry(quotation, db)
+    resp = format_quotation_response(quotation, db)
+
+    biz = quotation.business
+    biz_info = {
+        "name": biz.name if biz else "Apex Industrial Solutions",
+        "email": biz.email if biz else None,
+        "phone": biz.phone if biz else None,
+        "address": f"{biz.address or ''}, {biz.city or ''}, {biz.state or ''} {biz.pincode or ''}".strip(", "),
+        "gstin": biz.gstin if biz else None,
+        "logo_url": biz.logo_url if biz else None,
+    }
+    data = resp.model_dump()
+    data.update({
+        "quotation": resp,
+        "business": biz_info,
+        "business_name": biz.name if biz else "Apex Industrial Solutions",
+        "business_email": biz.email if biz else None,
+        "business_phone": biz.phone if biz else None,
+        "business_address": f"{biz.address or ''}, {biz.city or ''}, {biz.state or ''} {biz.pincode or ''}".strip(", "),
+        "business_gstin": biz.gstin if biz else None,
+        "business_logo_url": biz.logo_url if biz else None,
+    })
+    return data
+
+@router.post("/public/portal/{token}/respond")
+def retailer_respond_public(
+    token: str,
+    req: RetailerResponseRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Retailer decision endpoint: Accept or Reject proposal within the 24-hour window.
+    Strictly validated against authoritative server-side timestamps.
+    """
+    quotation = db.query(Quotation).filter(Quotation.public_token == token).first()
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation proposal not found or link has expired.")
+
+    # 1. Authoritative expiry check
+    if check_and_apply_expiry(quotation, db) or quotation.status == "EXPIRED":
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="This quotation has expired. You can no longer accept or reject it."
+        )
+
+    # 2. Prevent conflicting double responses
+    if quotation.status in ["ACCEPTED", "REJECTED"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"This quotation has already been {quotation.status.lower()} and cannot be changed."
+        )
+
+    action = req.action.strip().upper()
+    if action not in ["ACCEPT", "REJECT"]:
+        raise HTTPException(status_code=400, detail="Action must be 'ACCEPT' or 'REJECT'.")
+
+    now = datetime.now(timezone.utc)
+    if action == "ACCEPT":
+        quotation.status = "ACCEPTED"
+        quotation.customer_response = "ACCEPTED"
+        quotation.responded_at = now
+        quotation.response_notes = req.notes
+        event_name = "QUOTATION_ACCEPTED_BY_RETAILER"
+        desc = f"Quotation {quotation.quotation_number} ACCEPTED by retailer ({req.retailer_name or (quotation.customer.name if quotation.customer else 'Retailer')})."
+    else:
+        quotation.status = "REJECTED"
+        quotation.customer_response = "REJECTED"
+        quotation.responded_at = now
+        quotation.response_notes = req.notes
+        quotation.rejection_reason = req.notes
+        event_name = "QUOTATION_REJECTED_BY_RETAILER"
+        desc = f"Quotation {quotation.quotation_number} REJECTED by retailer: {req.notes or 'No reason provided.'}"
+
+    log_audit_event(
+        db=db,
+        business_id=quotation.business_id,
+        quotation_id=quotation.id,
+        event_type=event_name,
+        description=desc,
+        metadata={"action": action, "notes": req.notes, "responder": req.retailer_name}
+    )
+    db.commit()
+    db.refresh(quotation)
+    resp = format_quotation_response(quotation, db)
+    biz = quotation.business
+    data = resp.model_dump()
+    data.update({
+        "business_name": biz.name if biz else "Apex Industrial Solutions",
+        "business_email": biz.email if biz else None,
+        "business_phone": biz.phone if biz else None,
+        "business_address": f"{biz.address or ''}, {biz.city or ''}, {biz.state or ''} {biz.pincode or ''}".strip(", "),
+        "business_gstin": biz.gstin if biz else None,
+        "business_logo_url": biz.logo_url if biz else None,
+    })
+    return data
+
+@router.get("/status-counts", response_model=QuotationStatusCounts)
+def get_quotation_status_counts(
+    business: Business = Depends(get_current_business),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns accurate, authoritative database-backed quotation counts for every lifecycle status,
+    strictly scoped to the authenticated tenant/business.
+    Automatically applies server-side 24-hour expiry check before aggregating.
+    """
+    # 1. Authoritative catch-up: expire any pending response quotes whose deadline has lapsed
+    pending_quotes = db.query(Quotation).filter(
+        Quotation.business_id == business.id,
+        Quotation.status == "PENDING_RESPONSE"
+    ).all()
+    for pq in pending_quotes:
+        check_and_apply_expiry(pq, db)
+
+    # 2. Aggregation query grouped by status for this business
+    counts_query = (
+        db.query(Quotation.status, func.count(Quotation.id))
+        .filter(Quotation.business_id == business.id)
+        .group_by(Quotation.status)
+        .all()
+    )
+    status_map = {row[0]: row[1] for row in counts_query}
+
+    # 3. Overall total quotations for this business
+    total = db.query(func.count(Quotation.id)).filter(Quotation.business_id == business.id).scalar() or 0
+
+    return QuotationStatusCounts(
+        total=total,
+        draft=status_map.get("DRAFT", 0),
+        needs_review=status_map.get("NEEDS_REVIEW", 0),
+        pending_approval=status_map.get("PENDING_APPROVAL", 0),
+        approved=status_map.get("APPROVED", 0),
+        pending_response=status_map.get("PENDING_RESPONSE", 0),
+        accepted=status_map.get("ACCEPTED", 0),
+        rejected=status_map.get("REJECTED", 0),
+        expired=status_map.get("EXPIRED", 0),
+        cancelled=status_map.get("CANCELLED", 0)
+    )
 
 @router.get("/{id}", response_model=QuotationResponse)
 def get_quotation(
@@ -292,14 +482,117 @@ def get_quotation(
     if not quotation:
         raise HTTPException(status_code=404, detail="Quotation not found.")
 
-    resp = QuotationResponse.model_validate(quotation)
-    if quotation.customer:
-        resp.customer_name = quotation.customer.name
-        resp.customer_company = quotation.customer.company_name
-        resp.customer_email = quotation.customer.email
-        resp.customer_phone = quotation.customer.phone
-        resp.customer_gstin = quotation.customer.gstin
-    return resp
+    return format_quotation_response(quotation, db)
+
+@router.post("/{id}/send-to-retailer", response_model=QuotationResponse)
+def send_quotation_to_retailer(
+    id: int,
+    req: QuotationSendRequest = QuotationSendRequest(),
+    business: Business = Depends(get_current_business),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Sends quotation proposal to retailer.
+    Starts the authoritative 24-hour countdown (or custom deadline_hours for testing).
+    Generates a secure public token.
+    """
+    quotation = db.query(Quotation).filter(Quotation.id == id, Quotation.business_id == business.id).first()
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found.")
+
+    if quotation.status in ["ACCEPTED", "REJECTED", "EXPIRED"]:
+        raise HTTPException(status_code=400, detail=f"Cannot send quotation that is already '{quotation.status}'.")
+
+    now = datetime.now(timezone.utc)
+    deadline_hrs = req.deadline_hours or 24.0
+    expires_at = now + timedelta(hours=deadline_hrs)
+
+    if not quotation.public_token:
+        quotation.public_token = secrets.token_urlsafe(24)
+
+    quotation.status = "PENDING_RESPONSE"
+    quotation.sent_at = now
+    quotation.expires_at = expires_at
+
+    log_audit_event(
+        db=db,
+        business_id=business.id,
+        quotation_id=quotation.id,
+        user_id=current_user.id,
+        user_email=current_user.email,
+        event_type="QUOTATION_SENT_TO_RETAILER",
+        description=f"Quotation {quotation.quotation_number} sent to retailer with a {deadline_hrs}h deadline (Expires at {expires_at.strftime('%Y-%m-%d %H:%M UTC')}).",
+        metadata={
+            "deadline_hours": deadline_hrs,
+            "sent_at": now.isoformat(),
+            "expires_at": expires_at.isoformat(),
+            "public_token": quotation.public_token
+        }
+    )
+    db.commit()
+    db.refresh(quotation)
+    return format_quotation_response(quotation, db)
+
+@router.post("/{id}/retailer-response", response_model=QuotationResponse)
+def retailer_response_by_id(
+    id: int,
+    req: RetailerResponseRequest,
+    business: Business = Depends(get_current_business),
+    db: Session = Depends(get_db)
+):
+    """
+    Direct endpoint to record retailer acceptance or rejection by quotation ID.
+    Enforces authoritative 24-hour expiry check.
+    """
+    quotation = db.query(Quotation).filter(Quotation.id == id, Quotation.business_id == business.id).first()
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found.")
+
+    if check_and_apply_expiry(quotation, db) or quotation.status == "EXPIRED":
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="This quotation has expired. You can no longer accept or reject it."
+        )
+
+    if quotation.status in ["ACCEPTED", "REJECTED"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"This quotation has already been {quotation.status.lower()} and cannot be changed."
+        )
+
+    action = req.action.strip().upper()
+    if action not in ["ACCEPT", "REJECT"]:
+        raise HTTPException(status_code=400, detail="Action must be 'ACCEPT' or 'REJECT'.")
+
+    now = datetime.now(timezone.utc)
+    if action == "ACCEPT":
+        quotation.status = "ACCEPTED"
+        quotation.customer_response = "ACCEPTED"
+        quotation.responded_at = now
+        quotation.response_notes = req.notes
+        event_name = "QUOTATION_ACCEPTED_BY_RETAILER"
+        desc = f"Quotation {quotation.quotation_number} ACCEPTED by retailer ({req.retailer_name or (quotation.customer.name if quotation.customer else 'Retailer')})."
+    else:
+        quotation.status = "REJECTED"
+        quotation.customer_response = "REJECTED"
+        quotation.responded_at = now
+        quotation.response_notes = req.notes
+        quotation.rejection_reason = req.notes
+        event_name = "QUOTATION_REJECTED_BY_RETAILER"
+        desc = f"Quotation {quotation.quotation_number} REJECTED by retailer: {req.notes or 'No reason provided.'}"
+
+    log_audit_event(
+        db=db,
+        business_id=quotation.business_id,
+        quotation_id=quotation.id,
+        event_type=event_name,
+        description=desc,
+        metadata={"action": action, "notes": req.notes, "responder": req.retailer_name}
+    )
+    db.commit()
+    db.refresh(quotation)
+    return format_quotation_response(quotation, db)
 
 @router.put("/{id}", response_model=QuotationResponse)
 def update_quotation(
@@ -314,8 +607,11 @@ def update_quotation(
     if not quotation:
         raise HTTPException(status_code=404, detail="Quotation not found.")
 
-    if quotation.status == "APPROVED":
-        raise HTTPException(status_code=400, detail="Approved quotations cannot be modified directly. Please create a revision.")
+    if quotation.status in ["APPROVED", "PENDING_RESPONSE", "ACCEPTED", "EXPIRED"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Quotation in '{quotation.status}' status cannot be edited directly. To alter terms, please generate a new proposal."
+        )
 
     if req.items is not None:
         # Delete old items

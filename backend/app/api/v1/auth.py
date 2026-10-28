@@ -10,6 +10,7 @@ from app.models.settings import BusinessSettings
 from app.models.product import Product
 from app.models.customer import Customer
 from app.models.quotation import Quotation, QuotationItem
+from app.models.roi import ProductivityMeasurement
 from app.schemas.auth import LoginRequest, UserRegisterRequest, Token, UserResponse
 from app.api.v1.deps import get_current_user
 from app.services.audit_service import log_audit_event
@@ -136,6 +137,30 @@ def register_user_and_business(req: UserRegisterRequest, db: Session = Depends(g
         has_stock_warning=False
     )
     db.add(q_item)
+
+    # Seed starter ROI baseline measurement so the ROI Dashboard is immediately populated
+    starter_roi = ProductivityMeasurement(
+        business_id=business.id,
+        quotation_id=starter_quote.id,
+        manual_baseline_seconds=2100.0,
+        ai_processing_seconds=14.2,
+        human_review_seconds=115.0,
+        correction_seconds=30.0,
+        total_ai_assisted_seconds=159.2,
+        time_saved_seconds=1940.8,
+        time_reduction_pct=92.4,
+        fields_corrected_count=0,
+        validation_errors_caught_count=0,
+        labour_cost_per_hour=350.0,
+        estimated_labour_value_saved=188.69,
+        ai_operating_cost=0.50,
+        net_benefit=188.19,
+        is_demo_data=True,
+        measurement_type="DEMO_SEEDED",
+        notes="Starter baseline measurement for initial workspace quotation",
+        created_at=datetime.now(timezone.utc)
+    )
+    db.add(starter_roi)
 
     # Audit log
     log_audit_event(

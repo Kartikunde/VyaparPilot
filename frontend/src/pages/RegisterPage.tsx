@@ -54,19 +54,19 @@ export const RegisterPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <div className="bg-white py-6 px-6 shadow-sm border border-slate-200 rounded-2xl sm:px-8">
+      <div className="mt-7 sm:mx-auto sm:w-full sm:max-w-xl px-4 sm:px-0">
+        <div className="bg-white py-8 px-6 sm:p-9 shadow-sm border border-slate-200 rounded-2xl">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Company / Business Name</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Company / Business Name</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Building2 className="w-4 h-4" />
                 </div>
                 <input
@@ -76,15 +76,15 @@ export const RegisterPage: React.FC = () => {
                   value={formData.business_name}
                   onChange={handleChange}
                   placeholder="e.g. Apex Industrial Solutions Pvt Ltd"
-                  className="block w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="block w-full pl-10 pr-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Owner / Manager Full Name</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Owner / Manager Full Name</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <User className="w-4 h-4" />
                 </div>
                 <input
@@ -94,16 +94,16 @@ export const RegisterPage: React.FC = () => {
                   value={formData.full_name}
                   onChange={handleChange}
                   placeholder="e.g. Vikramaditya Deshmukh"
-                  className="block w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="block w-full pl-10 pr-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Work Email</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Work Email</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
@@ -113,15 +113,15 @@ export const RegisterPage: React.FC = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="sales@company.in"
-                    className="block w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="block w-full pl-10 pr-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Phone</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Contact Phone</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <Phone className="w-4 h-4" />
                   </div>
                   <input
@@ -131,16 +131,16 @@ export const RegisterPage: React.FC = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="9822012345"
-                    className="block w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="block w-full pl-10 pr-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -150,31 +150,31 @@ export const RegisterPage: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Minimum 8 characters"
-                  className="block w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="block w-full pl-10 pr-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">City</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">City</label>
                 <input
                   type="text"
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="block w-full px-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">GSTIN (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">GSTIN (Optional)</label>
                 <input
                   type="text"
                   name="gstin"
                   value={formData.gstin}
                   onChange={handleChange}
                   placeholder="27AAABC1234F1Z5"
-                  className="block w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="block w-full px-3.5 h-11 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
                 />
               </div>
             </div>
@@ -182,14 +182,14 @@ export const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5"
+              className="w-full mt-2 h-11 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 pt-0.5"
             >
               {loading ? 'Creating Workspace...' : 'Register Workspace'}
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-4 text-center text-xs text-slate-500">
+          <div className="mt-6 text-center text-sm text-slate-500">
             Already have an account?{' '}
             <NavLink to="/login" className="font-semibold text-brand-600 hover:text-brand-700">
               Sign In

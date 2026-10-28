@@ -163,38 +163,38 @@ export const ProductCataloguePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7">
       {/* Page Title & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Product Catalogue & Inventory</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Verified master data used for deterministic quoting, pricing guardrails, and margin calculation.
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Product Catalogue</h2>
+          <p className="text-sm text-slate-500 mt-1">
+            Master catalogue items, pricing, costs, and inventory thresholds.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 shrink-0">
           <a
             href={api.products.exportCsvUrl()}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs"
+            className="h-11 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold shadow-xs transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
             <span>Export CSV</span>
           </a>
 
           <button
             onClick={() => { setImportModalOpen(true); setImportStatus(null); setCsvFile(null); }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs"
+            className="h-11 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold shadow-xs transition-colors"
           >
-            <Upload className="w-3.5 h-3.5" />
+            <Upload className="w-4 h-4" />
             <span>Import CSV</span>
           </button>
 
           <button
             onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm"
+            className="h-11 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Add Product</span>
@@ -203,23 +203,23 @@ export const ProductCataloguePage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by SKU, product name..."
-            className="w-full text-xs pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full h-11 text-sm pl-10 pr-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white"
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <select
             value={category}
             onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-            className="text-xs px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="h-11 text-sm px-4 border border-slate-300 rounded-xl bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
@@ -227,12 +227,12 @@ export const ProductCataloguePage: React.FC = () => {
             ))}
           </select>
 
-          <label className="flex items-center gap-1.5 text-xs text-slate-700 font-medium cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer shrink-0">
             <input
               type="checkbox"
               checked={lowStockOnly}
               onChange={(e) => { setLowStockOnly(e.target.checked); setPage(1); }}
-              className="rounded text-brand-600 focus:ring-brand-500"
+              className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300"
             />
             <span>Low Stock Alert</span>
           </label>
@@ -242,22 +242,22 @@ export const ProductCataloguePage: React.FC = () => {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-200 text-slate-500 font-semibold text-[11px]">
-                <th className="py-3 px-4">SKU</th>
-                <th className="py-3 px-4">Product Name & Category</th>
-                <th className="py-3 px-4 text-right">Selling Price (₹)</th>
-                <th className="py-3 px-4 text-right">Cost Price (₹)</th>
-                <th className="py-3 px-4 text-center">Margin %</th>
-                <th className="py-3 px-4 text-center">Stock</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase tracking-wider">
+                <th className="py-4 px-5">SKU</th>
+                <th className="py-4 px-5">Product Name & Category</th>
+                <th className="py-4 px-5 text-right">Selling Price (₹)</th>
+                <th className="py-4 px-5 text-right">Cost Price (₹)</th>
+                <th className="py-4 px-5 text-center">Margin %</th>
+                <th className="py-4 px-5 text-center">Stock</th>
+                <th className="py-4 px-5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {products.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-16 text-center text-slate-400 text-sm">
                     No products found matching the criteria.
                   </td>
                 </tr>
@@ -270,12 +270,12 @@ export const ProductCataloguePage: React.FC = () => {
 
                   return (
                     <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-brand-700">
+                      <td className="py-4 px-5 font-mono font-bold text-brand-700">
                         {p.sku}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-4 px-5">
                         <div className="font-semibold text-slate-900">{p.name}</div>
-                        <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                        <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                           <span>{p.category}</span>
                           <span>•</span>
                           <span>Unit: {p.unit}</span>
@@ -287,13 +287,13 @@ export const ProductCataloguePage: React.FC = () => {
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">
+                      <td className="py-4 px-5 text-right font-bold text-slate-900">
                         ₹{p.unit_selling_price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3 px-4 text-right text-slate-500">
+                      <td className="py-4 px-5 text-right text-slate-500">
                         ₹{p.unit_cost.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-4 px-5 text-center">
                         <span
                           className={`font-semibold ${
                             marginPct < 15 ? 'text-rose-600 font-bold' : 'text-emerald-700'
@@ -302,33 +302,33 @@ export const ProductCataloguePage: React.FC = () => {
                           {marginPct.toFixed(1)}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-4 px-5 text-center">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                             isLowStock
-                              ? 'bg-amber-100 text-amber-800'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
                               : 'bg-slate-100 text-slate-700'
                           }`}
                         >
-                          {isLowStock && <AlertTriangle className="w-3 h-3 text-amber-600" />}
+                          {isLowStock && <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />}
                           {p.stock_quantity} {p.unit}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-4 px-5 text-right">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(p)}
-                            className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-brand-600"
+                            className="w-9 h-9 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-brand-600 inline-flex items-center justify-center transition-colors"
                             title="Edit"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className="p-1.5 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-600"
+                            className="w-9 h-9 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 inline-flex items-center justify-center transition-colors"
                             title="Delete"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -341,23 +341,23 @@ export const ProductCataloguePage: React.FC = () => {
         </div>
 
         {/* Pagination Bar */}
-        <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between text-sm text-slate-600">
           <div>
-            Showing <span className="font-semibold">{products.length}</span> of <span className="font-semibold">{total}</span> items
+            Showing <span className="font-semibold text-slate-800">{products.length}</span> of <span className="font-semibold text-slate-800">{total}</span> items
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 disabled:opacity-40"
+              className="h-9 px-4 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 disabled:opacity-40 transition-colors"
             >
               Previous
             </button>
-            <span className="font-semibold text-slate-700">Page {page}</span>
+            <span className="font-bold text-slate-800 text-xs px-2">Page {page}</span>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={products.length < 15}
-              className="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 disabled:opacity-40"
+              className="h-9 px-4 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 disabled:opacity-40 transition-colors"
             >
               Next
             </button>
@@ -368,43 +368,43 @@ export const ProductCataloguePage: React.FC = () => {
       {/* Create / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="text-sm font-bold text-slate-900">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-xl p-7 sm:p-8 overflow-y-auto max-h-[90vh] space-y-5">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
                 {editingProduct ? 'Edit Catalogue Item' : 'Add New Catalogue Product'}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 mb-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
                 {formError}
               </div>
             )}
 
-            <form onSubmit={handleFormSubmit} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleFormSubmit} className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">SKU / Item Code</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">SKU / Item Code</label>
                   <input
                     type="text"
                     required
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Category</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Category</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   >
                     {categories.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -414,54 +414,54 @@ export const ProductCataloguePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Product Title</label>
+                <label className="block font-semibold text-slate-700 mb-1.5">Product Title</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Three-Phase Induction Motor 5HP 1440 RPM"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Specifications / Description</label>
+                <label className="block font-semibold text-slate-700 mb-1.5">Specifications / Description</label>
                 <textarea
                   rows={2}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Technical details, mounting, efficiency rating..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full p-3.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 leading-relaxed"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Unit of Measure</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Unit of Measure</label>
                   <input
                     type="text"
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value.toUpperCase() })}
                     placeholder="PCS, METERS, BOXES..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">HSN Code (GST)</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">HSN Code (GST)</label>
                   <input
                     type="text"
                     value={formData.hsn_code}
                     onChange={(e) => setFormData({ ...formData, hsn_code: e.target.value })}
                     placeholder="85015210"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Unit Selling Price (₹)</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Unit Selling Price (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -469,11 +469,11 @@ export const ProductCataloguePage: React.FC = () => {
                     required
                     value={formData.unit_selling_price}
                     onChange={(e) => setFormData({ ...formData, unit_selling_price: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Unit Cost Price (₹)</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Unit Cost Price (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -481,48 +481,48 @@ export const ProductCataloguePage: React.FC = () => {
                     required
                     value={formData.unit_cost}
                     onChange={(e) => setFormData({ ...formData, unit_cost: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Stock Quantity</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Stock Quantity</label>
                   <input
                     type="number"
                     min="0"
                     required
                     value={formData.stock_quantity}
                     onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Reorder Threshold</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Reorder Threshold</label>
                   <input
                     type="number"
                     min="0"
                     required
                     value={formData.reorder_threshold}
                     onChange={(e) => setFormData({ ...formData, reorder_threshold: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="h-11 px-5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold"
+                  className="h-11 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-sm"
                 >
                   {formSubmitting ? 'Saving...' : editingProduct ? 'Save Changes' : 'Create Product'}
                 </button>
@@ -535,28 +535,28 @@ export const ProductCataloguePage: React.FC = () => {
       {/* CSV Import Modal */}
       {importModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md p-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="text-sm font-bold text-slate-900">Bulk Import Products via CSV</h3>
-              <button onClick={() => setImportModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg p-7 sm:p-8 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-slate-900">Bulk Import Products via CSV</h3>
+              <button onClick={() => setImportModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleImportSubmit} className="space-y-4 text-xs">
-              <p className="text-slate-500 text-[11px]">
-                Upload a CSV file containing columns: <code className="bg-slate-100 px-1 py-0.5 rounded font-mono">sku, name, category, unit, unit_selling_price, unit_cost, stock_quantity</code>.
+            <form onSubmit={handleImportSubmit} className="space-y-4 text-sm">
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Upload a CSV file containing columns: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700 font-semibold">sku, name, category, unit, unit_selling_price, unit_cost, stock_quantity</code>.
               </p>
 
               <input
                 type="file"
                 accept=".csv"
                 onChange={(e) => setCsvFile(e.target.files ? e.target.files[0] : null)}
-                className="w-full text-xs p-2 border border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50"
+                className="w-full text-sm p-3 border border-dashed border-slate-300 rounded-xl cursor-pointer bg-slate-50"
               />
 
               {importStatus && (
-                <div className={`p-3 rounded-lg text-xs ${importStatus.error ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
+                <div className={`p-4 rounded-xl text-sm ${importStatus.error ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
                   {importStatus.error ? (
                     <div>{importStatus.error}</div>
                   ) : (
@@ -567,18 +567,18 @@ export const ProductCataloguePage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setImportModalOpen(false)}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  className="h-11 px-5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
                   disabled={!csvFile || importLoading}
-                  className="px-4 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold disabled:opacity-50"
+                  className="h-11 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-sm disabled:opacity-50"
                 >
                   {importLoading ? 'Importing...' : 'Upload & Process'}
                 </button>

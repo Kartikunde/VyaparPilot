@@ -93,6 +93,15 @@ class QuotationUpdate(BaseModel):
     notes: Optional[str] = None
     status: Optional[str] = None
 
+class QuotationSendRequest(BaseModel):
+    deadline_hours: Optional[float] = Field(default=24.0, gt=0, le=720, description="Acceptance deadline in hours (default 24.0)")
+    notes: Optional[str] = None
+
+class RetailerResponseRequest(BaseModel):
+    action: str = Field(..., description="'ACCEPT' or 'REJECT'")
+    notes: Optional[str] = None
+    retailer_name: Optional[str] = None
+
 class QuotationResponse(BaseModel):
     id: int
     business_id: int
@@ -126,6 +135,17 @@ class QuotationResponse(BaseModel):
     approved_by_user_id: Optional[int] = None
     has_guardrail_warnings: bool = False
     guardrail_warnings_json: Optional[str] = None
+    
+    # 24-Hour Acceptance Deadline fields
+    sent_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    responded_at: Optional[datetime] = None
+    customer_response: Optional[str] = None
+    response_notes: Optional[str] = None
+    public_token: Optional[str] = None
+    seconds_remaining: Optional[float] = None
+    is_expired: Optional[bool] = False
+
     created_at: datetime
     updated_at: Optional[datetime] = None
     items: List[QuotationItemResponse] = []
@@ -139,3 +159,18 @@ class QuotationListResponse(BaseModel):
     page: int
     page_size: int
     total_pages: int
+
+class QuotationStatusCounts(BaseModel):
+    total: int = 0
+    draft: int = 0
+    needs_review: int = 0
+    pending_approval: int = 0
+    approved: int = 0
+    pending_response: int = 0
+    accepted: int = 0
+    rejected: int = 0
+    expired: int = 0
+    cancelled: int = 0
+
+    class Config:
+        from_attributes = True

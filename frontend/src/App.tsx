@@ -19,6 +19,7 @@ import { ROIDashboardPage } from './pages/ROIDashboardPage';
 import { AuditPage } from './pages/AuditPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { RetailerPortalPage } from './pages/RetailerPortalPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, loading } = useAuth();
@@ -47,6 +48,7 @@ export const App: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/portal/:token" element={<RetailerPortalPage />} />
 
           {/* Protected Application Routes */}
           <Route

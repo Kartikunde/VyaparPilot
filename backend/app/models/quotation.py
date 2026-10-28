@@ -43,6 +43,14 @@ class Quotation(Base):
     has_guardrail_warnings = Column(Boolean, default=False)
     guardrail_warnings_json = Column(Text, nullable=True)
 
+    # 24-Hour Quotation Acceptance Deadline & Expiry Tracking
+    sent_at = Column(DateTime, nullable=True)
+    expires_at = Column(DateTime, nullable=True, index=True)
+    responded_at = Column(DateTime, nullable=True)
+    customer_response = Column(String(50), nullable=True)  # ACCEPTED, REJECTED, EXPIRED
+    response_notes = Column(Text, nullable=True)
+    public_token = Column(String(100), unique=True, index=True, nullable=True)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

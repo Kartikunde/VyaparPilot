@@ -108,7 +108,11 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
 
   if (response.status === 401) {
     removeAuthToken();
-    if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+    if (
+      window.location.pathname !== '/login' &&
+      window.location.pathname !== '/' &&
+      !window.location.pathname.startsWith('/portal')
+    ) {
       window.location.href = '/login';
     }
     throw new Error('Your session has expired. Please log in again.');
@@ -253,6 +257,7 @@ export const api = {
       if (params.search) q.set('search', params.search);
       return request<any>(`/quotations/?${q.toString()}`);
     },
+    getStatusCounts: () => request<any>('/quotations/status-counts'),
     calculate: (data: any) =>
       request<any>('/quotations/calculate', {
         method: 'POST',
@@ -282,6 +287,23 @@ export const api = {
       request<any>(`/quotations/${id}/reject`, {
         method: 'POST',
         body: JSON.stringify({ action: 'REJECT', comments }),
+      }),
+    sendToRetailer: (id: number, data: { deadline_hours?: number; custom_note?: string } = {}) =>
+      request<any>(`/quotations/${id}/send-to-retailer`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    retailerResponse: (id: number, data: { action: 'ACCEPT' | 'REJECT'; notes?: string; retailer_name?: string }) =>
+      request<any>(`/quotations/${id}/retailer-response`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    getPublicPortal: (token: string) =>
+      request<any>(`/quotations/public/portal/${token}`),
+    retailerRespondPublic: (token: string, data: { action: 'ACCEPT' | 'REJECT'; notes?: string; retailer_name?: string }) =>
+      request<any>(`/quotations/public/portal/${token}/respond`, {
+        method: 'POST',
+        body: JSON.stringify(data),
       }),
     getPdfUrl: (id: number) => {
       const token = getAuthToken();

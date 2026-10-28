@@ -1,0 +1,18 @@
+{
+  "name": "college-event-management-system",
+  "version": "1.0.0",
+  "description": "Full-Stack College Event Management System (MongoDB NoSQL, Express, React, Vite)",
+  "scripts": {
+    "start:server": "npm --prefix server start",
+    "dev:server": "npm --prefix server run dev",
+    "start:client": "npm --prefix client run dev",
+    "build:client": "npm --prefix client run build",
+    "seed": "npm --prefix server run seed",
+    "db:setup": "npm --prefix server run db:setup",
+    "db:export": "npm --prefix server run db:export",
+    "db:inspect": "npm --prefix server run db:inspect"
+  },
+  "keywords": ["mongodb", "nosql", "event-management", "express", "react", "vite", "aggregation-pipeline"],
+  "author": "",
+  "license": "ISC"
+}

@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.core.config import settings
-from app.core.database import Base, engine
+from app.core.database import Base, engine, run_auto_migrations
 
 # Import all models to ensure metadata registration
 import app.models
@@ -23,8 +23,9 @@ from app.api.v1.health import router as health_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("vyaparpilot")
 
-# Create tables automatically on startup
+# Create tables and run auto-migrations automatically on startup
 Base.metadata.create_all(bind=engine)
+run_auto_migrations()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

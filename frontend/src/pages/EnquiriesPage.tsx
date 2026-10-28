@@ -128,48 +128,50 @@ export const EnquiriesPage: React.FC = () => {
         items: result.matched_items.map(m => ({
           product_id: m.matched_product_id,
           sku: m.sku || '',
-          name: m.name || m.original_item.product_query,
-          description: m.description || m.original_item.specifications || '',
+          name: m.name,
+          description: `Customer requested: "${m.original_item.product_query}"`,
           quantity: m.quantity,
           unit: m.unit,
           unit_price: m.unit_selling_price,
           unit_cost: m.unit_cost,
           discount_pct: 0,
+          line_total: m.line_total || (m.quantity * m.unit_selling_price),
           verification_status: m.match_type,
-          match_confidence: m.match_confidence
+          match_confidence: m.match_confidence,
+          stock_available: m.stock_available
         }))
       }
     });
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-8">
+      {/* Page Title */}
       <div>
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">AI Customer Enquiry Studio</h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Ingest raw customer messages, extract structured items, verify catalogue prices, and flag inventory constraints.
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">AI Enquiry Studio</h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Extract structured items from customer RFQs and match with catalogue pricing.
         </p>
       </div>
 
       {/* Main Studio Grid */}
-      <div className="grid lg:grid-cols-12 gap-6">
+      <div className="grid lg:grid-cols-12 gap-8">
         {/* Left Column: Input Form (5 cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
+        <div className="lg:col-span-5 space-y-5">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-7 space-y-5">
             {/* Quick Sample Selector */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-                Quick Test Samples (Click to Load)
+              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-brand-600" />
+                <span>Test Samples</span>
               </label>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {SAMPLE_ENQUIRIES.map((sample, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleSelectSample(sample)}
-                    className="w-full text-left text-xs p-2 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 transition-colors text-slate-700 font-medium truncate"
+                    className="w-full text-left text-xs sm:text-sm p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 transition-colors text-slate-700 font-medium truncate"
                   >
                     {sample.name}
                   </button>
@@ -179,63 +181,64 @@ export const EnquiriesPage: React.FC = () => {
 
             {/* Title */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Enquiry Title / Reference</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Title / Reference</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. RFQ: Commissioning Supplies"
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                placeholder="e.g. Assembly Line Supplies"
+                className="w-full h-11 text-sm px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white"
               />
             </div>
 
             {/* Raw Text Input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Paste Customer Message (Email / WhatsApp / RFQ)
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Customer Message
               </label>
               <textarea
                 rows={9}
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste the message from the customer here..."
-                className="w-full text-xs p-3 font-mono border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 leading-relaxed"
+                placeholder="Paste email, WhatsApp RFQ, or message..."
+                className="w-full text-sm p-4 font-mono border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 leading-relaxed bg-white"
               ></textarea>
             </div>
 
             {/* Controls */}
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+              <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-600">
                 <input
                   type="checkbox"
                   checked={forceDemo}
                   onChange={(e) => setForceDemo(e.target.checked)}
-                  className="rounded text-brand-600 focus:ring-brand-500"
+                  className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300"
                 />
-                <span>Force Local Demo NLP</span>
+                <span>Local NLP Engine</span>
               </label>
 
               <button
                 type="button"
                 onClick={handleProcessEnquiry}
                 disabled={loading || !rawText.trim()}
-                className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                className="h-11 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-6 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   <>
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Extracting & Verifying...
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Processing...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5" /> Run AI Verification
+                    <Sparkles className="w-4 h-4" />
+                    <span>Process Enquiry</span>
                   </>
                 )}
               </button>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
                 {error}
               </div>
             )}
@@ -245,45 +248,45 @@ export const EnquiriesPage: React.FC = () => {
         {/* Right Column: AI Extraction & Verified Matching Preview (7 cols) */}
         <div className="lg:col-span-7">
           {result ? (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-5">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-7 space-y-6">
               {/* Top Banner with Execution Timing */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span className="text-xs font-bold text-slate-900">Extracted & Verified Results</span>
-                  <span className="text-[10px] font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                  <span className="text-sm font-bold text-slate-900">Extracted Items</span>
+                  <span className="text-xs font-mono bg-slate-100 px-2.5 py-1 rounded-md text-slate-600 font-semibold">
                     {result.ai_mode_used}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-teal-700 font-semibold bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-                  <Clock className="w-3.5 h-3.5 text-teal-600" />
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-teal-700 font-semibold bg-teal-50 px-3 py-1.5 rounded-full border border-teal-200">
+                  <Clock className="w-4 h-4 text-teal-600" />
                   <span>AI Latency: {result.processing_time_seconds}s</span>
                 </div>
               </div>
 
               {/* Extracted Metadata Card */}
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 grid sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200/80 grid sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-slate-400 font-medium">Customer:</span>{' '}
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-900">
                     {result.extracted_structure.customer_name || 'Not detected'}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Company:</span>{' '}
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-900">
                     {result.extracted_structure.company_name || 'Not detected'}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Phone / Email:</span>{' '}
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-900">
                     {result.extracted_structure.contact_phone || result.extracted_structure.contact_email || 'Missing'}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Delivery Destination:</span>{' '}
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-900">
                     {result.extracted_structure.delivery_location || 'MIDC Pune'}
                   </span>
                 </div>
@@ -291,12 +294,12 @@ export const EnquiriesPage: React.FC = () => {
 
               {/* Missing Information Alerts */}
               {result.extracted_structure.missing_information?.length > 0 && (
-                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
-                  <div className="font-bold flex items-center gap-1 mb-1 text-amber-900">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 space-y-1.5">
+                  <div className="font-bold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
                     <span>Missing Customer / RFQ Data Detected:</span>
                   </div>
-                  <ul className="list-disc pl-5 space-y-0.5 text-[11px]">
+                  <ul className="list-disc pl-5 space-y-1 text-xs sm:text-sm text-amber-800">
                     {result.extracted_structure.missing_information.map((m, idx) => (
                       <li key={idx}>{m}</li>
                     ))}
@@ -305,19 +308,19 @@ export const EnquiriesPage: React.FC = () => {
               )}
 
               {/* Product Matching Table */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <div className="space-y-3.5">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center justify-between">
                   <span>Matched Catalogue Items ({result.matched_items.length})</span>
-                  <span className="text-brand-600 font-mono font-bold">
+                  <span className="text-brand-600 font-mono font-bold text-sm sm:text-base">
                     Est. Subtotal: ₹{result.total_estimated_subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </span>
                 </h4>
 
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {result.matched_items.map((item, idx) => (
                     <div
                       key={idx}
-                      className={`p-3 rounded-xl border text-xs transition-all ${
+                      className={`p-4 sm:p-5 rounded-xl border text-sm transition-all space-y-2.5 ${
                         item.has_stock_warning
                           ? 'border-amber-300 bg-amber-50/40'
                           : item.match_type === 'VERIFIED_EXACT'
@@ -325,8 +328,8 @@ export const EnquiriesPage: React.FC = () => {
                           : 'border-slate-200 bg-white'
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
                           <span className="font-mono font-bold text-slate-900">
                             {item.quantity} {item.unit}
                           </span>
@@ -335,17 +338,17 @@ export const EnquiriesPage: React.FC = () => {
                             {item.name}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
                           {item.match_type === 'VERIFIED_EXACT' ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" /> Exact Verified ({(item.match_confidence * 100).toFixed(0)}%)
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Exact Verified ({(item.match_confidence * 100).toFixed(0)}%)
                             </span>
                           ) : item.match_type === 'SUGGESTED_MATCH' ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800">
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800">
                               Suggested ({(item.match_confidence * 100).toFixed(0)}%)
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
                               Unmatched
                             </span>
                           )}
@@ -355,27 +358,27 @@ export const EnquiriesPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="text-[11px] text-slate-500 mb-2">
-                        <span className="font-semibold text-slate-600">Customer requested:</span> "{item.original_item.product_query}"
-                        {item.sku && <span className="ml-2 font-mono text-brand-700 bg-brand-50 px-1 py-0.2 rounded font-semibold">[{item.sku}]</span>}
+                      <div className="text-xs sm:text-sm text-slate-500">
+                        <span className="font-semibold text-slate-700">Customer requested:</span> "{item.original_item.product_query}"
+                        {item.sku && <span className="ml-2 font-mono text-brand-700 bg-brand-50 px-2 py-0.5 rounded font-semibold text-xs">[{item.sku}]</span>}
                       </div>
 
                       {/* Warnings pill */}
                       {item.has_stock_warning && (
-                        <div className="mt-1 text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2 py-1 rounded flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                        <div className="text-xs sm:text-sm font-semibold text-amber-800 bg-amber-100/70 p-2.5 rounded-lg flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                           <span>{item.warning_details}</span>
                         </div>
                       )}
 
                       {/* Candidate selector */}
                       {item.candidates && item.candidates.length > 1 && (
-                        <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center gap-2">
-                          <span className="text-[10px] font-semibold text-slate-500">Switch SKU:</span>
+                        <div className="pt-2.5 border-t border-slate-200/60 flex items-center gap-2.5 flex-wrap">
+                          <span className="text-xs font-semibold text-slate-500">Switch SKU:</span>
                           <select
                             value={item.matched_product_id || ''}
                             onChange={(e) => handleCandidateChange(idx, Number(e.target.value))}
-                            className="text-[11px] py-1 px-2 border border-slate-300 rounded bg-white text-slate-700"
+                            className="h-9 text-xs py-1 px-3 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                           >
                             {item.candidates.map((c) => (
                               <option key={c.product_id} value={c.product_id}>
@@ -391,31 +394,31 @@ export const EnquiriesPage: React.FC = () => {
               </div>
 
               {/* 1-Click Convert to Quotation Button */}
-              <div className="pt-2">
+              <div className="pt-3">
                 <button
                   type="button"
                   onClick={handleConvertToQuotation}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:shadow-lg"
+                  className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2.5 hover:shadow-lg active:scale-[0.99]"
                 >
-                  <FileCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Convert to Verified Quotation in Builder</span>
+                  <FileCheck className="w-5 h-5 text-emerald-400" />
+                  <span>Open in Quotation Builder</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center flex flex-col items-center justify-center min-h-[350px]">
-              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
-                <Sparkles className="w-6 h-6" />
+            <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mb-4">
+                <Sparkles className="w-7 h-7" />
               </div>
-              <h3 className="text-sm font-bold text-slate-800">No Enquiry Extracted Yet</h3>
-              <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
+              <h3 className="text-base font-bold text-slate-800">No Enquiry Extracted Yet</h3>
+              <p className="text-sm text-slate-500 max-w-sm mt-1.5 mb-6 leading-relaxed">
                 Select one of the sample presets on the left or paste a customer email/WhatsApp to run verified AI matching.
               </p>
               <button
                 type="button"
                 onClick={handleProcessEnquiry}
-                className="bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold px-4 py-2 rounded-lg transition-colors border border-brand-200"
+                className="h-11 bg-brand-50 hover:bg-brand-100 text-brand-700 text-sm font-semibold px-5 rounded-xl transition-colors border border-brand-200"
               >
                 Run Sample 1 Now
               </button>

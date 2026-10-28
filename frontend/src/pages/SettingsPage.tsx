@@ -83,148 +83,148 @@ export const SettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-[450px]">
+        <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Business Settings & Guardrails</h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Configure company profile for official PDF quotations, pricing guardrails, and hourly labour cost for ROI calculation.
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Settings & Guardrails</h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Manage company profile, pricing guardrails, and labour rates.
         </p>
       </div>
 
       {successMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-8">
         {/* Profile Card */}
         {profile && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4 flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-brand-600" />
-              <span>Company Information & PDF Branding</span>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-7 sm:p-8 space-y-6">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2.5 pb-2 border-b border-slate-100">
+              <Building2 className="w-5 h-5 text-brand-600" />
+              <span>Company Profile</span>
             </h3>
 
-            <form onSubmit={handleSaveProfile} className="space-y-3.5 text-xs">
+            <form onSubmit={handleSaveProfile} className="space-y-4 text-sm">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Business Name</label>
+                <label className="block font-semibold text-slate-700 mb-1.5">Business Name</label>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full h-11 px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Tagline / Business Nature</label>
+                <label className="block font-semibold text-slate-700 mb-1.5">Tagline / Business Nature</label>
                 <input
                   type="text"
                   value={profile.tagline || ''}
                   onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
                   placeholder="e.g. Precision Engineering & Industrial Wholesaler"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full h-11 px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Phone</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Phone</label>
                   <input
                     type="text"
                     value={profile.phone}
                     onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Email</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Email</label>
                   <input
                     type="text"
                     value={profile.email}
                     disabled
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400"
+                    className="w-full h-11 px-4 border border-slate-200 rounded-xl bg-slate-50 text-slate-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Address</label>
+                <label className="block font-semibold text-slate-700 mb-1.5">Address</label>
                 <input
                   type="text"
                   value={profile.address}
                   onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full h-11 px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">City</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">City</label>
                   <input
                     type="text"
                     value={profile.city}
                     onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    className="w-full h-11 px-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">State</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">State</label>
                   <input
                     type="text"
                     value={profile.state}
                     onChange={(e) => setProfile({ ...profile, state: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    className="w-full h-11 px-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Pincode</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">Pincode</label>
                   <input
                     type="text"
                     value={profile.pincode}
                     onChange={(e) => setProfile({ ...profile, pincode: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    className="w-full h-11 px-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">GSTIN</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">GSTIN</label>
                   <input
                     type="text"
                     value={profile.gstin || ''}
                     onChange={(e) => setProfile({ ...profile, gstin: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">PAN</label>
+                  <label className="block font-semibold text-slate-700 mb-1.5">PAN</label>
                   <input
                     type="text"
                     value={profile.pan || ''}
                     onChange={(e) => setProfile({ ...profile, pan: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="pt-3 flex justify-end">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center gap-1.5"
+                  className="h-11 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center gap-2 shadow-sm transition-colors"
                 >
-                  <Save className="w-3.5 h-3.5" />
+                  <Save className="w-4 h-4" />
                   <span>Update Profile</span>
                 </button>
               </div>
@@ -234,17 +234,17 @@ export const SettingsPage: React.FC = () => {
 
         {/* Pricing Guardrails & ROI Parameters Card */}
         {settings && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Pricing Guardrails & ROI Baselines</span>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-7 sm:p-8 space-y-6">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2.5 pb-2 border-b border-slate-100">
+              <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              <span>Guardrails & ROI Baselines</span>
             </h3>
 
-            <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="font-bold text-slate-900 text-xs">Deterministic Pricing Guardrails</div>
+            <form onSubmit={handleSaveSettings} className="space-y-5 text-sm">
+              <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-4">
+                <div className="font-bold text-slate-900 text-sm">Deterministic Pricing Guardrails</div>
                 <div>
-                  <label className="block text-slate-600 mb-1">
+                  <label className="block text-slate-700 font-semibold mb-1.5">
                     Minimum Gross Margin Threshold (%):
                   </label>
                   <input
@@ -254,13 +254,13 @@ export const SettingsPage: React.FC = () => {
                     max="100"
                     value={settings.min_margin_threshold_pct}
                     onChange={(e) => setSettings({ ...settings, min_margin_threshold_pct: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
-                  <p className="text-[10px] text-slate-400 mt-1">Quotations below this gross margin will require mandatory owner review.</p>
+                  <p className="text-xs text-slate-400 mt-1">Quotations below this gross margin will require mandatory owner review.</p>
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1">
+                  <label className="block text-slate-700 font-semibold mb-1.5">
                     Maximum Permitted Discount (%):
                   </label>
                   <input
@@ -270,16 +270,16 @@ export const SettingsPage: React.FC = () => {
                     max="100"
                     value={settings.max_discount_threshold_pct}
                     onChange={(e) => setSettings({ ...settings, max_discount_threshold_pct: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
-                  <p className="text-[10px] text-slate-400 mt-1">Discounts exceeding this trigger policy alerts.</p>
+                  <p className="text-xs text-slate-400 mt-1">Discounts exceeding this trigger policy alerts.</p>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-teal-50/50 border border-teal-200 space-y-3">
-                <div className="font-bold text-slate-900 text-xs">Verifiable ROI Measurement Inputs</div>
+              <div className="p-4 sm:p-5 rounded-xl bg-teal-50/50 border border-teal-200/80 space-y-4">
+                <div className="font-bold text-slate-900 text-sm">Verifiable ROI Measurement Inputs</div>
                 <div>
-                  <label className="block text-slate-600 mb-1">
+                  <label className="block text-slate-700 font-semibold mb-1.5">
                     Staff / Estimator Hourly Cost (₹ / hour):
                   </label>
                   <input
@@ -287,13 +287,13 @@ export const SettingsPage: React.FC = () => {
                     min="0"
                     value={settings.labour_cost_per_hour}
                     onChange={(e) => setSettings({ ...settings, labour_cost_per_hour: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">Used to convert saved hours into authentic Rupee return.</p>
+                  <p className="text-xs text-slate-500 mt-1">Used to convert saved hours into authentic Rupee return.</p>
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1">
+                  <label className="block text-slate-700 font-semibold mb-1.5">
                     Historical Manual Prep Baseline (Minutes):
                   </label>
                   <input
@@ -302,19 +302,19 @@ export const SettingsPage: React.FC = () => {
                     max="120"
                     value={settings.default_manual_prep_time_minutes}
                     onChange={(e) => setSettings({ ...settings, default_manual_prep_time_minutes: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono"
+                    className="w-full h-11 px-4 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">Typical time your business previously took to prepare a manual quotation.</p>
+                  <p className="text-xs text-slate-500 mt-1">Typical time your business previously took to prepare a manual quotation.</p>
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="pt-3 flex justify-end">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold flex items-center gap-1.5"
+                  className="h-11 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold flex items-center gap-2 shadow-sm transition-colors"
                 >
-                  <Save className="w-3.5 h-3.5" />
+                  <Save className="w-4 h-4" />
                   <span>Update Guardrails & ROI</span>
                 </button>
               </div>

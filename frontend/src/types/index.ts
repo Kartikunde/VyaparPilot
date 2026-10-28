@@ -232,7 +232,7 @@ export interface Quotation {
   enquiry_id?: number;
   quotation_number: string;
   title?: string;
-  status: 'DRAFT' | 'NEEDS_REVIEW' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  status: 'DRAFT' | 'NEEDS_REVIEW' | 'PENDING_APPROVAL' | 'APPROVED' | 'PENDING_RESPONSE' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
   currency: string;
   subtotal: number;
   discount_amount: number;
@@ -253,8 +253,54 @@ export interface Quotation {
   approved_by_user_id?: number;
   has_guardrail_warnings: boolean;
   guardrail_warnings_json?: string;
+  sent_at?: string;
+  expires_at?: string;
+  responded_at?: string;
+  customer_response?: string;
+  response_notes?: string;
+  public_token?: string;
+  seconds_remaining?: number;
+  is_expired?: boolean;
   created_at: string;
   updated_at?: string;
+  items: QuotationItem[];
+}
+
+export interface RetailerPortalData {
+  id: number;
+  quotation_number: string;
+  title?: string;
+  status: string;
+  business_name?: string;
+  business_address?: string;
+  business_phone?: string;
+  business_email?: string;
+  business_gstin?: string;
+  customer_name?: string;
+  customer_company?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  customer_gstin?: string;
+  currency: string;
+  subtotal: number;
+  discount_amount: number;
+  discount_percentage?: number;
+  tax_rate: number;
+  tax_amount: number;
+  tax_type?: string;
+  delivery_charge: number;
+  grand_total: number;
+  notes?: string;
+  payment_terms?: string;
+  delivery_terms?: string;
+  sent_at?: string;
+  expires_at?: string;
+  responded_at?: string;
+  customer_response?: string;
+  response_notes?: string;
+  public_token?: string;
+  seconds_remaining?: number;
+  is_expired?: boolean;
   items: QuotationItem[];
 }
 
@@ -264,6 +310,19 @@ export interface QuotationListResponse {
   page: number;
   page_size: number;
   total_pages: number;
+}
+
+export interface QuotationStatusCounts {
+  total: number;
+  draft: number;
+  needs_review: number;
+  pending_approval: number;
+  approved: number;
+  pending_response: number;
+  accepted: number;
+  rejected: number;
+  expired: number;
+  cancelled: number;
 }
 
 export interface ApprovalEvent {
